@@ -1,0 +1,198 @@
+// Screen Size Breakpoints
+$screen-sizes: (
+  'small':    480px,
+  'medium':   720px,
+  'large':    960px,
+  'x-large':  1280px
+);
+
+// text sizes
+$text-sizes: (
+  'small-text': (
+    'small': (
+      'font-size': 8px,
+      'line-height': 12px
+    ),
+    'medium': (
+      'font-size': 9px,
+      'line-height': 13px
+    ),
+    'large': (
+      'font-size': 10px,
+      'line-height': 14px
+    ),
+    'x-large': (
+      'font-size': 11px,
+      'line-height': 15px
+    )
+  ),
+  'baseline': (
+    'small': (
+      'font-size': 12px,
+      'line-height': 20px
+    ),
+    'medium': (
+      'font-size': 14px,
+      'line-height': 24px
+    ),
+    'large': (
+      'font-size': 16px,
+      'line-height': 28px
+    ),
+    'x-large': (
+      'font-size': 18px,
+      'line-height': 32px
+    )
+  ),
+  'small-header': (
+    'small': (
+      'font-size': 12px,
+      'line-height': 20px
+    ),
+    'medium': (
+      'font-size': 13px,
+      'line-height': 22px
+    ),
+    'large': (
+      'font-size': 14px,
+      'line-height': 24px
+    ),
+    'x-large': (
+      'font-size': 15px,
+      'line-height': 26px
+    )
+  ),
+  'medium-header': (
+    'small': (
+      'font-size': 14px,
+      'line-height': 20px
+    ),
+    'medium': (
+      'font-size': 16px,
+      'line-height': 24px
+    ),
+    'large': (
+      'font-size': 18px,
+      'line-height': 28px
+    ),
+    'x-large': (
+      'font-size': 20px,
+      'line-height': 32px
+    )
+  ),
+  'large-header': (
+    'small': (
+      'font-size': 20px,
+      'line-height': 30px
+    ),
+    'medium': (
+      'font-size': 24px,
+      'line-height': 38px
+    ),
+    'large': (
+      'font-size': 28px,
+      'line-height': 46px
+    ),
+    'x-large': (
+      'font-size': 32px,
+      'line-height': 54px
+    )
+  )
+);
+
+// setting text size value logic
+@function text-breakpoint($text-size) {
+  $text-breakpoint-value: map-get($text-sizes, $text-size);
+
+  @if $text-breakpoint-value {
+    @return $text-breakpoint-value;
+  }
+}
+
+// setting screen-breakpoint value logic
+@function screen-breakpoint($screen-breakpoint-name) {
+  $screen-breakpoint-value: map-get($screen-sizes, $screen-breakpoint-name);
+
+  @if $screen-breakpoint-value {
+    @return $screen-breakpoint-value;
+  }
+}
+
+// Seperator for each screen width value
+@mixin width-value($screen-breakpoint-name) {
+  $width-value: screen-breakpoint($screen-breakpoint-name);
+
+  @if $width-value {
+    @media screen and (min-width: $width-value) {
+      @content;
+    }
+  }
+}
+
+// combining logic
+@function text-values($text-size, $screen-breakpoint-name) {
+  $text-breakpoint-value: text-breakpoint($text-size);
+  $text-values: map-get($text-breakpoint-value, $screen-breakpoint-name);
+
+  @if $text-values {
+    @return $text-values;
+  }
+}
+
+// Logic for creating the breakpoints and where to set each size
+@mixin text($text-size, $screen-breakpoint-name: 'small') {
+  $text-size-values: text-values($text-size, $screen-breakpoint-name);
+
+  @if $text-size-values {
+    font-size: map-get($text-size-values, 'font-size');
+    line-height: map-get($text-size-values, 'line-height');
+  }
+}
+
+@mixin text-size-responsive($text-size, $default-screen-breakpoint: 'small') {
+  @include text($text-size, $default-screen-breakpoint);
+
+  $text-breakpoint: text-breakpoint($text-size);
+  $text-breakpoint-map-keys: map-keys($text-breakpoint);
+
+  @each $screen-breakpoint-name in $text-breakpoint-map-keys {
+    @if $screen-breakpoint-name != $default-screen-breakpoint {
+      @include width-value($screen-breakpoint-name) {
+        @include text($text-size, $screen-breakpoint-name);
+      }
+    }
+  }
+}
+
+// CSS for building each section
+h1,
+h1.header--large,
+.header--large {
+  @include text-size-responsive('large-header');
+}
+
+h2,
+h2.header--medium ,
+.header--medium {
+  @include text-size-responsive('medium-header');
+}
+
+h3,
+h3.header--samll,
+.header--samll {
+  @include text-size-responsive('small-header');
+}
+
+h4,
+h5,
+h6,
+body,
+p,
+.text--baseline {
+  @include text-size-responsive('baseline');
+}
+
+p.text--small,
+.text--small {
+  @include text-size-responsive('small-text');
+}
